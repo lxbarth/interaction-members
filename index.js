@@ -1,39 +1,23 @@
 var csv = require('csv'),
     fs = require('fs'),
     _ = require('underscore'),
-    template = fs.readFileSync('./template._', 'utf-8'),
-    countries = {};
+    template = fs.readFileSync('./template._', 'utf-8');
 
-csv()
-    .fromPath('./womw2011.csv', {trim: true, columns: true})
-    .on('data', function(data) {
-        countries[data.Country] = countries[data.Country] || [];
-        countries[data.Country].push({
-            name: data.Organization,
-            iso: data.ISO || '',
-            link: data['Link'] || 'http://google.com/?q=' +
-                encodeURIComponent(data.Organization) + '&output=search'
+var serial = function () {
+    (_(arguments).reduceRight(_.wrap, function() {}))();
+};
+
+serial(function(next) {
+    var members = {};
+    csv()
+        .fromPath('./members.csv', {trim: true, columns: true})
+        .on('data', function(data) {
+            if (data['MEMBER ORG']) members[data['MEMBER ORG']] = data['WEBSITE'];
+        })
+        .on('end', function() {
+            next(members);
         });
-    })
-    .on('end', function() {
-        var writer = csv()
-            .toPath('./out.csv', {columns: ['country', 'total', 'organizations'], header: true});
-        _.each(countries, function(organizations, country) {
-            organizations = _.chain(organizations)
-                .uniq(function(o) {
-                    return o.name;
-                })
-                .sortBy(function(o) {
-                    return o.name;
-                })
-                .value();
-            console.log(organizations);
-            writer.write({
-                country: country,
-                total: _.size(organizations),
-                organizations: _.template(template, {
-                    organizations: organizations
-                })});
-        });
-        writer.end();
-    });
+},
+function(next, members) {
+    console.log(members);
+});
