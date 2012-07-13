@@ -19,5 +19,28 @@ serial(function(next) {
         });
 },
 function(next, members) {
-    console.log(members);
+    var countries = {};
+    csv()
+        .fromPath('./countries.csv', {trim: true, columns: true})
+        .transform(function(data) {
+            data['Member Organization'] =
+            _(data['Member Organization'].split(','))
+                .map(function(e) {
+                    return {
+                        name: e.trim(),
+                        link: members[e.trim()]
+                    };
+                });
+            data['count'] = _.size(data['Member Organization']);
+            return data;
+        })
+        .on('data', function(data) {
+            console.log(data);
+        })
+        .on('end', function() {
+            next(countries);
+        });
+},
+function(next, countries) {
+    
 });
