@@ -27,12 +27,8 @@ function(next, links) {
         .fromPath('./countries.csv', {trim: true, columns: true})
         .transform(function(data) {
             var members = _.chain(data['Member Organization'].split(','))
-                .uniq(function(m) {
-                    return m.name;
-                })
-                .sortBy(function(m) {
-                    return m.name;
-                })
+                .uniq()
+                .sort()
                 .map(function(m) {
                     return {
                         name: m.trim(),
@@ -40,6 +36,8 @@ function(next, links) {
                     };
                 })
                 .value();
+            // No idea why sort does not completely sort the array. Help.
+            members.shift(members.pop());
             return {    
                 'name': data['Country'],
                 'id': data['ID'],
