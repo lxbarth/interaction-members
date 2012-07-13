@@ -1,5 +1,0 @@
-<ul>
-  <% _.each(organizations, function(org) { %>
-  <li><a href='<%= org.link %>'><%= org.name %></a></li>
-  <% }); %>
-</ul>

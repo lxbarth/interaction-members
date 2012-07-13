@@ -1,46 +1,69 @@
 var csv = require('csv'),
     fs = require('fs'),
     _ = require('underscore'),
-    template = fs.readFileSync('./template._', 'utf-8');
+    memberTemplate = fs.readFileSync('./memberTemplate._', 'utf-8');
 
 var serial = function () {
     (_(arguments).reduceRight(_.wrap, function() {}))();
 };
 
-serial(function(next) {
-    var members = {};
+serial(
+// Read members.csv
+function(next) {
+    var links = {};
     csv()
         .fromPath('./members.csv', {trim: true, columns: true})
         .on('data', function(data) {
-            if (data['MEMBER ORG']) members[data['MEMBER ORG']] = data['WEBSITE'];
+            if (data['MEMBER ORG']) links[data['MEMBER ORG']] = data['WEBSITE'];
         })
         .on('end', function() {
-            next(members);
+            next(links);
         });
 },
-function(next, members) {
-    var countries = {};
+// Read and transform countries.csv
+function(next, links) {
+    var countries = [];
     csv()
         .fromPath('./countries.csv', {trim: true, columns: true})
         .transform(function(data) {
-            data['Member Organization'] =
-            _(data['Member Organization'].split(','))
-                .map(function(e) {
+            var members = _.chain(data['Member Organization'].split(','))
+                .uniq(function(m) {
+                    return m.name;
+                })
+                .sortBy(function(m) {
+                    return m.name;
+                })
+                .map(function(m) {
                     return {
-                        name: e.trim(),
-                        link: members[e.trim()]
+                        name: m.trim(),
+                        link: links[m.trim()]
                     };
-                });
-            data['count'] = _.size(data['Member Organization']);
-            return data;
+                })
+                .value();
+            return {    
+                'name': data['Country'],
+                'id': data['ID'],
+                'ISO': data['ISO'],
+                'total': _.size(members),
+                'members': _.template(memberTemplate, {members: members})
+            };
         })
         .on('data', function(data) {
-            console.log(data);
+            countries.push(data);
         })
         .on('end', function() {
-            next(countries);
+            next(_.sortBy(countries, function(c) { return c.name; }));
         });
 },
+// Write out to new file.
 function(next, countries) {
-    
+    var writer = csv()
+        .toPath('./countries-processed.csv', {
+            columns: Object.keys(countries[0]),
+            header: true
+        });
+    _.each(countries, function(country) {
+        writer.write(country);
+    });
+    writer.end();
 });
