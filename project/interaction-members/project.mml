@@ -11,7 +11,16 @@
     2
   ],
   "format": "png",
-  "interactivity": false,
+  "interactivity": {
+    "layer": "activity",
+    "template_teaser": "<h2>{{{name:1}}}: {{{total}}} active members</h2>\n",
+    "template_full": "<h2>{{{name:1}}}: {{{total}}} active members</h2>\n\n{{{members}}}\n",
+    "fields": [
+      "name:1",
+      "total",
+      "members"
+    ]
+  },
   "minzoom": 0,
   "maxzoom": 22,
   "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
@@ -28,8 +37,28 @@
         "file": "http://mapbox-geodata.s3.amazonaws.com/natural-earth-1.4.0/cultural/10m-admin-0-countries.zip",
         "type": "shape"
       }
+    },
+    {
+      "geometry": "polygon",
+      "Datasource": {
+        "type": "sqlite",
+        "file": "/Users/ab/apps/interaction-members/project/interaction-members/countries.sqlite",
+        "table": "(SELECT * FROM countries  JOIN interaction_activity ON countries.adm0_a3 = interaction_activity.ISO)",
+        "attachdb": "interaction_activity@./interaction_activity.sqlite",
+        "extent": "",
+        "id": "activity",
+        "project": "interaction-members",
+        "srs": null
+      },
+      "id": "activity",
+      "class": "",
+      "srs-name": "900913",
+      "srs": "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+      "name": "activity"
     }
   ],
   "name": "InterAction Member Activity Map",
-  "description": ""
+  "description": "",
+  "_basemap": "http://a.tiles.mapbox.com/v3/mapbox.mapbox-streets.jsonp",
+  "legend": ""
 }
