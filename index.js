@@ -56,11 +56,11 @@ function(next, links) {
 },
 // Write out to new file.
 function(next, countries) {
-    var db = new sqlite.Database('countries.sqlite');
+    var db = new sqlite.Database('interaction_activity.sqlite');
     db.serialize(function() {
-        db.run("CREATE TABLE countries (name VARCHAR(256), id INT, ISO VARCHAR(3), total INT, members TEXT)");
+        db.run("CREATE TABLE interaction_activity (name VARCHAR(256), id INT, ISO VARCHAR(3), total INT, members TEXT)");
         _.each(countries, function(country) {
-            db.run("INSERT INTO countries VALUES($name, $id, $ISO, $total, $members)", country);
+            db.run("INSERT INTO interaction_activity VALUES($name, $id, $ISO, $total, $members)", country);
         });
         db.close();
     });
