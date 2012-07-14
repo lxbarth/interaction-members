@@ -1,7 +1,8 @@
 var csv = require('csv'),
     fs = require('fs'),
     _ = require('underscore'),
-    memberTemplate = fs.readFileSync('./memberTemplate._', 'utf-8');
+    memberTemplate = fs.readFileSync('./memberTemplate._', 'utf-8'),
+    sqlite = require('sqlite3').verbose();
 
 var serial = function () {
     (_(arguments).reduceRight(_.wrap, function() {}))();
@@ -39,11 +40,11 @@ function(next, links) {
             // No idea why sort does not completely sort the array. Help.
             members.shift(members.pop());
             return {    
-                'name': data['Country'],
-                'id': data['ID'],
-                'ISO': data['ISO'],
-                'total': _.size(members),
-                'members': _.template(memberTemplate, {members: members})
+                '$name': data['Country'],
+                '$id': data['ID'],
+                '$ISO': data['ISO'],
+                '$total': _.size(members),
+                '$members': _.template(memberTemplate, {members: members})
             };
         })
         .on('data', function(data) {
@@ -55,13 +56,13 @@ function(next, links) {
 },
 // Write out to new file.
 function(next, countries) {
-    var writer = csv()
-        .toPath('./countries-processed.csv', {
-            columns: Object.keys(countries[0]),
-            header: true
+    var db = new sqlite.Database('countries.sqlite');
+    db.serialize(function() {
+        db.run("CREATE TABLE countries (name VARCHAR(256), id INT, ISO VARCHAR(3), total INT, members TEXT)");
+        _.each(countries, function(country) {
+            db.run("INSERT INTO countries VALUES($name, $id, $ISO, $total, $members)", country);
         });
-    _.each(countries, function(country) {
-        writer.write(country);
+        db.close();
     });
-    writer.end();
+    return;
 });
