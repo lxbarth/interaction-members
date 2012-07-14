@@ -56,7 +56,7 @@ function(next, links) {
 },
 // Write out to new file.
 function(next, countries) {
-    var db = new sqlite.Database('interaction_activity.sqlite');
+    var db = new sqlite.Database('./project/interaction-members/interaction_activity.sqlite');
     db.serialize(function() {
         db.run("CREATE TABLE interaction_activity (name VARCHAR(256), id INT, ISO VARCHAR(3), total INT, members TEXT)");
         _.each(countries, function(country) {
