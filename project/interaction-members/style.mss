@@ -2,15 +2,6 @@ Map {
   background-color: #000;
 }
 
-#countries {
-  ::outline {
-    line-color: #372c37;
-    line-width: .5;
-    line-join: round;
-  }
-  polygon-fill: #292129;
-}
-
 #activity {
   [total > 1] { polygon-fill: #382037; }
   [total > 5] { polygon-fill: #4d1d4b; }
